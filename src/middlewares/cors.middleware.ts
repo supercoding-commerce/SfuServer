@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import config from 'config';
+import * as config from 'config';
 import { NextFunction, Request, Response } from 'express';
 
 import { ReqHelper } from './req.helper';

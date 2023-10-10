@@ -6,8 +6,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import config from 'config';
-import io from 'socket.io';
+import * as config from 'config';
+import io, { Socket, Server } from 'socket.io';
 
 import * as mediasoup from 'mediasoup';
 import { Worker, WorkerSettings } from 'mediasoup/node/lib/Worker';
@@ -23,7 +23,7 @@ const mediasoupSettings = config.get<IMediasoupSettings>('MEDIASOUP_SETTINGS');
 @WebSocketGateway(appSettings.wssPort)
 export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  public server: io.Server;
+  public server: Server;
 
   public rooms: Map<string, WssRoom> = new Map();
 
@@ -199,7 +199,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('mediaRoomClients')
-  public async roomClients(client: io.Socket) {
+  public async roomClients(client: Socket) {
     try {
       const { session_id } = this.getClientQuery(client);
 
@@ -216,7 +216,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('mediaRoomInfo')
-  public async roomInfo(client: io.Socket) {
+  public async roomInfo(client: Socket) {
     try {
       const { session_id } = this.getClientQuery(client);
 
@@ -229,7 +229,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('media')
-  public async media(client: io.Socket, msg: IMsMessage) {
+  public async media(client: Socket, msg: IMsMessage) {
     try {
       const { user_id, session_id } = this.getClientQuery(client);
 
@@ -242,7 +242,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('mediaReconfigure')
-  public async roomReconfigure(client: io.Socket) {
+  public async roomReconfigure(client: Socket) {
     try {
       const { session_id } = this.getClientQuery(client);
 

@@ -1,54 +1,61 @@
-import { Request, Response } from 'express';
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import * as config from 'config';
+import { NextFunction, Request, Response } from 'express';
 
-// tslint:disable: no-feature-envy
-export class ReqHelper {
-  public getIp(req: Request): string {
-    return req.ip || (req.connection && req.connection.remoteAddress) || '-';
+import { ReqHelper } from './req.helper';
+
+import { LoggerService } from '../logger/logger.service';
+
+@Injectable()
+export class LoggerMiddleware extends ReqHelper implements NestMiddleware {
+  private readonly _settings: ILogSettings = config.get('LOGGER_SETTINGS');
+
+  constructor(private readonly logger: LoggerService) {
+    super();
   }
 
-  public getUrl(req: Request): string {
-    return req.originalUrl || req.url || req.baseUrl || '-';
-  }
-
-  public getHttpVersion(req: Request): string {
-    return req.httpVersionMajor + '.' + req.httpVersionMinor;
-  }
-
-  public getResponseHeader(res: Response, field: string) {
-    if (!res.headersSent) {
-      return undefined;
+  public use(req: Request, res: Response, next: NextFunction) {
+    const action = this.getUrl(req).split('/')[1];
+    if (this._settings.silence.includes(action)) {
+      return next();
     }
 
-    const header = res.getHeader(field);
+    req.on('error', (error: Error) => {
+      this.logMethodByStatus(error.message, error.stack, req.statusCode);
+    });
 
-    return Array.isArray(header) ? header.join(', ') : header || '-';
+    res.on('error', (error: Error) => {
+      this.logMethodByStatus(error.message, error.stack, res.statusCode);
+    });
+
+    res.on('finish', () => {
+      const message = {
+        path: `${req.method} ${this.getUrl(req)}`,
+        referrer: this.getReferrer(req),
+        userAgent: this.getUserAgent(req),
+        remoteAddress: this.getIp(req),
+        status: `${res.statusCode} ${res.statusMessage}`,
+      };
+
+      this.logMethodByStatus(message, '', res.statusCode);
+    });
+
+    return next();
   }
 
-  public getReferrer(req: Request) {
-    const referer = req.headers.referer || req.headers.referrer || '-';
-
-    if (typeof referer === 'string') {
-      return referer;
+  // tslint:disable-next-line: no-any
+  private logMethodByStatus(
+    message: any,
+    stack: string,
+    statusCode: number = 500,
+  ) {
+    const prefix = 'LoggerMiddleware';
+    if (statusCode < 300) {
+      return this.logger.info(message, prefix);
+    } else if (statusCode < 400) {
+      return this.logger.warn(message, prefix);
+    } else {
+      return this.logger.error(message, stack, prefix);
     }
-
-    return referer[0];
-  }
-
-  public getOrigin(req: Request) {
-    const origin = req.headers.origin;
-
-    if (!origin || typeof origin === 'string') {
-      return origin;
-    }
-
-    return origin[0];
-  }
-
-  public getMethod(req: Request) {
-    return req.method;
-  }
-
-  public getUserAgent(req: Request) {
-    return req.headers['user-agent'] || '-';
   }
 }

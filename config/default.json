@@ -15,7 +15,7 @@
     "sslKey": ""
   },
   "CORS_SETTINGS": {
-    "allowedOrigins": [],
+    "allowedOrigins": ["*"],
     "allowedMethods": ["GET", "POST", "PUT", "PATCH", "OPTIONS"],
     "allowedCredentials": false,
     "allowedHeaders": [

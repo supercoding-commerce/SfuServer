@@ -1,4 +1,4 @@
-import config from 'config';
+import * as config from 'config';
 import io from 'socket.io';
 
 import { AudioLevelObserver } from 'mediasoup/node/lib/AudioLevelObserver';
