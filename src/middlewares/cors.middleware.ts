@@ -20,27 +20,30 @@ export class CorsMiddleware extends ReqHelper implements NestMiddleware {
   ) {
     const origin = this.getOrigin(req);
 
-    const allowedOrigins = corsSettings.allowedOrigins;
-    const allowedMethods = corsSettings.allowedMethods;
-    const allowedHeaders = corsSettings.allowedHeaders;
+    // const allowedOrigins = corsSettings.allowedOrigins;
+    // const allowedMethods = corsSettings.allowedMethods;
+    // const allowedHeaders = corsSettings.allowedHeaders;
 
-    const findOrigin = allowedOrigins.find((o) => o === origin);
+    // const findOrigin = allowedOrigins.find((o) => o === origin);
 
-    if (origin && allowedOrigins.length) {
-      res.setHeader(
-        'Access-Control-Allow-Origin',
-        findOrigin || allowedOrigins[0],
-      );
-    } else {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-    }
+    // if (origin && allowedOrigins.length) {
+    //   res.setHeader(
+    //     'Access-Control-Allow-Origin',
+    //     findOrigin || allowedOrigins[0],
+    //   );
+    // } else {
+    //   res.setHeader('Access-Control-Allow-Origin', '*');
+    // }
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
 
-    res.setHeader('Access-Control-Allow-Methods', allowedMethods.join(','));
-    res.setHeader('Access-Control-Allow-Headers', allowedHeaders.join(','));
-    res.setHeader(
-      'Access-Control-Allow-Credentials',
-      `${corsSettings.allowedCredentials}`,
-    );
+    // res.setHeader('Access-Control-Allow-Methods', allowedMethods.join(','));
+    // res.setHeader('Access-Control-Allow-Headers', allowedHeaders.join(','));
+    // res.setHeader(
+    //   'Access-Control-Allow-Credentials',
+    //   `${corsSettings.allowedCredentials}`,
+    // );
     res.setHeader('Access-Control-Max-Age', '1728000');
 
     return next();

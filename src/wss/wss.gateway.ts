@@ -58,7 +58,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * Создает воркеры медиасупа.
+   * 미디어 수프 워커를 만듭니다.
    * @returns {Promise<void>} Promise<void>
    */
   private async createWorkers(): Promise<void> {
@@ -85,7 +85,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * Обновляет инфу о количество пользователей на веркере.
+   * 서버의 사용자 수에 대한 정보를 업데이트합니다.
    * @returns {void} void
    */
   public updateWorkerStats(): void {
@@ -118,7 +118,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * Возвращает номер воркер с наименьшим количеством участников.
+   * 참가자 수가 가장 적은 워커의 수를 반환합니다.
    * @returns {number} number
    */
   private getOptimalWorkerIndex(): number {
@@ -133,11 +133,12 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
   }
 
-  private getClientQuery(client: io.Socket): IClientQuery {
+  private getClientQuery(client: Socket): IClientQuery {
     return client.handshake.query as unknown as IClientQuery;
   }
 
-  public async handleConnection(client: io.Socket) {
+  //새로운 클라이언트가 웹소켓 서버에 연결될 때 호출됩니다.
+  public async handleConnection(client: Socket) {
     try {
       const query = this.getClientQuery(client);
 
@@ -263,7 +264,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * Меняет воркер у комнаты.
+   *
    * @param {WssRoom} room комната
    * @returns {Promise<void>} Promise<void>
    */

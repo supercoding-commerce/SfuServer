@@ -166,7 +166,7 @@ export class WssRoom {
   }
 
   /**
-   * Конфигурируем воркер.
+   * 작업자를 구성합니다.
    * @returns {Promise<void>} Promise<void>
    */
   public async load(): Promise<void> {
@@ -178,7 +178,7 @@ export class WssRoom {
   }
 
   /**
-   * Закрывает комнату убивая все соединения с ней.
+   * 방을 닫고 모든 연결을 끊습니다.
    * @returns {void} void
    */
   public close(): void {
@@ -208,9 +208,9 @@ export class WssRoom {
   }
 
   /**
-   * Меняет воркер в комнате.
-   * @param {IWorker} worker воркер
-   * @param {number} index индекс воркера
+   * 방의 작업자를 변경합니다.
+   * @param {IWorker} worker
+   * @param {number} index 워커의 인덱스
    * @returns {Promise<void>} Promise<void>
    */
   public async reConfigureMedia(worker: Worker, index: number): Promise<void> {
@@ -243,11 +243,11 @@ export class WssRoom {
   }
 
   /**
-   * Отправляет сообщения от клиента всем в комнату.
-   * @param {io.Socket} client клиент
-   * @param {string} event ивент из сообщения
-   * @param {msg} msg сообщение клиента
-   * @returns {boolean} boolean
+   * 클라이언트의 메시지를 방에 있는 모든 사람에게 보냅니다.
+   * @param {io.Socket} client
+   * @param {string} event
+   * @param {msg} msg
+   * @returns {boolean}
    */
   public broadcast(client: io.Socket, event: string, msg: object): boolean {
     try {
@@ -258,10 +258,10 @@ export class WssRoom {
   }
 
   /**
-   * Отправляет сообщения от клиента всем в комнату включая его.
-   * @param {string} event ивент из сообщения
-   * @param {msg} msg сообщение клиента
-   * @returns {boolean} boolean
+   * 클라이언트의 메시지를 그를 포함하여 방에 있는 모든 사람에게 보냅니다
+   * @param {string} event
+   * @param {msg} msg
+   * @returns {boolean}
    */
   public broadcastAll(event: string, msg: object): boolean {
     try {
@@ -272,8 +272,8 @@ export class WssRoom {
   }
 
   /**
-   *  Убивает все соединения с медиасупом для клиента.
-   * @param {IMediasoupClient} mediaClient данные из комнату по медиасупу клиенту
+   *  클라이언트의 미디어 수프에 대한 모든 연결을 종료합니다.
+   * @param {IMediasoupClient} mediaClient 클라이언트 데이터
    * @returns {boolean} boolean
    */
   private closeMediaClient(mediaClient: IMediasoupClient): boolean {
@@ -308,9 +308,9 @@ export class WssRoom {
   }
 
   /**
-   * Добавляет юзера в комнату.
-   * @param {IClientQuery} query query клиента
-   * @param {io.Socket} client клиент
+   *방에 사용자를 추가합니다.
+   * @param {IClientQuery} query query
+   * @param {io.Socket} client
    * @returns {Promise<boolean>} Promise<boolean>
    */
   public async addClient(
@@ -340,8 +340,8 @@ export class WssRoom {
   }
 
   /**
-   * Удаляет юзера из комнаты.
-   * @param {string} user_id юзера
+   * 사용자를 방에서 제거합니다.
+   * @param {string} user_id
    * @returns {Promise<boolean>} Promise<boolean>
    */
   public async removeClient(user_id: string): Promise<boolean> {
@@ -373,9 +373,9 @@ export class WssRoom {
   }
 
   /**
-   * Обрабатывает сообщение.
-   * @param {string} user_id автор сообщения
-   * @param {IMsMessage} msg сообщение
+   * 메시지를 처리합니다.
+   * @param {string} user_id
+   * @param {IMsMessage} msg
    * @returns {Promise<object | boolean>} Promise<object | boolean>
    */
   public async speakMsClient(
@@ -480,9 +480,9 @@ export class WssRoom {
   }
 
   /**
-   * Создает WebRTC транспорт для приема или передачи стрима.
+   * 스트림 수신 또는 전송을 위한 WebRTC 전송을 생성합니다.
    * @param {object} data { type: TPeer }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id 메시지 작성자
    * @returns {Promise<object>} Promise<object>
    */
   private async createWebRtcTransport(
@@ -538,9 +538,9 @@ export class WssRoom {
   }
 
   /**
-   * Подключает WebRTC транспорт.
+   * WebRTC 전송을 연결합니다.
    * @param {object} data { dtlsParameters: RTCDtlsParameters; type: TPeer }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id
    * @returns {Promise<object>} Promise<object>
    */
   private async connectWebRtcTransport(
@@ -584,9 +584,9 @@ export class WssRoom {
   }
 
   /**
-   * Принимает стрим видео или аудио от пользователя.
+   * 사용자로부터 스트림 비디오 또는 오디오를 수신합니다.
    * @param {object} data { rtpParameters: RTCRtpParameters; kind: MediaKind }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id
    * @returns {Promise<object>} Promise<object>
    */
   private async produce(
@@ -656,9 +656,9 @@ export class WssRoom {
   }
 
   /**
-   * Передает стрим видео или аудио от одного пользователя другому.
+   *한 사용자에게서 다른 사용자에게 비디오 또는 오디오 스트림을 전송합니다.
    * @param {object} data { rtpCapabilities: RTCRtpCapabilities; user_id: string; kind: MediaKind }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id 메시지 작성자
    * @returns {Promise<object>} Promise<object>
    */
   private async consume(
@@ -813,7 +813,7 @@ export class WssRoom {
   }
 
   /**
-   * Перезапустить соединительные узлы.
+   * 연결 노드를 다시 시작합니다.
    * @param {object} data { type: TPeer }
    * https://developer.mozilla.org/ru/docs/Web/API/WebRTC_API/%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D1%8B
    * @param {string} user_id автор сообщения
@@ -858,9 +858,9 @@ export class WssRoom {
   }
 
   /**
-   * Запросить опорный кадр.
+   * 참조 프레임을 요청합니다.
    * @param {object} data { user_id: string }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id
    * @returns {Promise<boolean>} Promise<boolean>
    */
   private async requestConsumerKeyFrame(
@@ -891,9 +891,9 @@ export class WssRoom {
   }
 
   /**
-   * Отдает стату транспорта.
+   * 통계를 제공
    * @param {object} data { type: TPeer }
-   * @param {string} user_id автор сообщения
+   * @param {string} user_id
    * @returns {Promise<object>} Promise<object>
    */
   private async getTransportStats(
@@ -937,10 +937,10 @@ export class WssRoom {
   }
 
   /**
-   * Отдает инфу о стриме юзера
-   * Замер происходит когда от юзера приходит стрим на сервер.
+   * 사용자의 스트림에 대한 정보를 제공합니다.
+   *측정은 스트림이 사용자로부터 서버로 들어올 때 발생합니다.
    * @param {object} data { user_id: string; kind: MediaKind }
-   * @param {string} _user_id автор сообщения
+   * @param {string} _user_id
    * @returns {Promise<object>} Promise<object>
    */
   private async getProducerStats(
@@ -984,8 +984,8 @@ export class WssRoom {
   }
 
   /**
-   * Отдает инфу о стриме юзера на которого подписан текущий юзер
-   * Замер происходит когда от того юзера передается стрим текущему юзеру.
+   * 현재 사용자가 구독하고 있는 사용자의 스트림에 대한 정보를 제공합니다.
+   * 측정은 스트림이 해당 사용자에서 현재 사용자로 전송될 때 발생합니다.
    * @param {object} data { user_id: string; kind: MediaKind }
    * @param {string} user_id автор сообщения
    * @returns {Promise<object>} Promise<object>
@@ -1031,8 +1031,8 @@ export class WssRoom {
   }
 
   /**
-   * Id юзеров которые передаеют стримы на сервер.
-   * @param {string} _user_id автор сообщения
+   * 서버에 스트림을 전송하는 사용자의 ID입니다.
+   * @param {string} _user_id
    * @returns {Promise<string[]>} Promise<string[]>
    */
   private async getVideoProducerIds(_user_id: string): Promise<string[]> {
@@ -1048,8 +1048,8 @@ export class WssRoom {
   }
 
   /**
-   * Id юзеров которые передаеют стримы на сервер.
-   * @param {string} _user_id автор сообщения
+   * 서버에 스트림을 전송하는 사용자의 ID입니다.
+   * @param {string} _user_id
    * @returns {Promise<string[]>} Promise<string[]>
    */
   private async getAudioProducerIds(_user_id: string): Promise<string[]> {
@@ -1065,7 +1065,7 @@ export class WssRoom {
   }
 
   /**
-   * Остановить передачу стрима на сервер от пользователя.
+   * 사용자로부터 서버로의 스트림 전송을 중지합니다.
    * @param {object} data { user_id: string; kind: MediaKind }
    * @param {string} _user_id автор сообщения
    * @returns {Promise<boolean>} promise<boolean>
@@ -1105,9 +1105,9 @@ export class WssRoom {
   }
 
   /**
-   * Приостановить передачу стрима на сервер от пользователя.
+   * 사용자로부터 서버로의 스트림 전송을 일시 중지합니다.
    * @param {object} data { user_id: string; kind: MediaKind }
-   * @param {string} _user_id автор сообщения
+   * @param {string} _user_id
    * @returns {Promise<boolean>} promise<boolean>
    */
   private async producerPause(
@@ -1145,7 +1145,7 @@ export class WssRoom {
   }
 
   /**
-   * Возобновить передачу стрима на сервер от пользователя.
+   *사용자로부터 서버로의 스트림 전송을 재개합니다.
    * @param {object} data { user_id: string; kind: MediaKind }
    * @param {string} _user_id автор сообщения
    * @returns {Promise<boolean>} promise<boolean>
@@ -1191,7 +1191,7 @@ export class WssRoom {
   }
 
   /**
-   * Остановить передачу стрима на сервер от всех пользователей.
+   * 모든 사용자로부터 서버로의 스트리밍을 중지합니다.
    * @param {object} data { kind: MediaKind }
    * @param {string} _user_id автор сообщения
    * @returns {Promise<boolean>} promise<boolean>
@@ -1231,7 +1231,7 @@ export class WssRoom {
   }
 
   /**
-   * Приостановить передачу стрима на сервер от всех пользователей.
+   * 모든 사용자의 서버로의 스트리밍을 일시 중지합니다.
    * @param {object} data { kind: MediaKind }
    * @param {string} _user_id автор сообщения
    * @returns {Promise<boolean>} promise<boolean>
@@ -1271,7 +1271,7 @@ export class WssRoom {
   }
 
   /**
-   * Возобновить передачу стрима на сервер от всех пользователей.
+   * 모든 사용자로부터 서버로의 스트리밍을 재개합니다.
    * @param {object} data { kind: MediaKind }
    * @param {string} _user_id автор сообщения
    * @returns {Promise<boolean>} promise<boolean>
@@ -1317,7 +1317,7 @@ export class WssRoom {
   }
 
   /**
-   * Изменяет качество стрима.
+   * 스트림의 품질을 변경합니다.
    * @returns {Promise<boolean>} Promise<boolean>
    */
   private async updateMaxIncomingBitrate(): Promise<boolean> {

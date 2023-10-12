@@ -6,6 +6,8 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    //allowSyntheticDefaultImports는 default import의 동작을 ES6 모듈 스펙과 호환되도록 허용합니다.
+    //즉, import io from 'socket.io-client'와 같은 구문이 가능해집니다.
     "allowSyntheticDefaultImports": true,
     "target": "esnext",
     "sourceMap": true,
