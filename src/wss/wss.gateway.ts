@@ -69,6 +69,9 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
     }
 
+    //합산이 아니라, 배열의 요소를 객체로 변환하는데에 reduce 사용
+    //따라서, reduce 메서드는 단순히 숫자를 합산하는 것 외에도, 배열의 요소를 다른 형태의 데이터 구조로 변환하는 데 유용하게 사용될 수 있습니다.
+    //이러한 유연성 때문에 reduce는 JavaScript에서 배열을 처리하는 데 있어서 매우 강력한 도구 중 하나로 간주됩니다.
     this.workers = (await Promise.all(promises)).reduce(
       (acc, worker, index) => {
         acc[index] = {
@@ -77,6 +80,7 @@ export class WssGateway implements OnGatewayConnection, OnGatewayDisconnect {
           pid: worker.pid,
           worker,
         };
+        console.log(`created worder pid ${worker.pid}`);
 
         return acc;
       },

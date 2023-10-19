@@ -44,8 +44,13 @@ export class WssRoom {
     private readonly wssServer: io.Server,
   ) {}
 
+  //worker 하나가 여러 개의 Router를 가질 수 있다
+  //단, CPU 코어 하나 당 하나의 worker 만을 handle 할 수 있으므로, worker 수는 CPU 대수 까지로 제한해야 한다.
   private async configureWorker() {
     try {
+      //라우터를 사용해서 미디어 스트림을 전달할 수 있고, 이는 router에 생성된 Transport 인스턴스를 통해 가능하다
+      //쉽게 이해하자면 Router는 ‘방’ 개념으로 사용될 수 있다. (하나의 router가 하나의 화상채팅 방이 되는 개념)
+      //Router는 worker 로 부터 생성된다.
       await this.worker
         .createRouter({
           mediaCodecs: JSON.parse(
@@ -501,9 +506,9 @@ export class WssRoom {
 
       const transport = await this.router.createWebRtcTransport({
         listenIps: mediasoupSettings.webRtcTransport.listenIps,
-        enableUdp: true,
-        enableSctp: true,
-        enableTcp: true,
+        enableUdp: true, // UDP는 연결 없는 프로토콜로, 낮은 지연 시간을 제공합니다. 대부분의 WebRTC 통신은 UDP를 기반으로 합니다.
+        enableSctp: true, //WebRTC는 주로 UDP를 사용하지만, 일부 환경에서 UDP가 차단된 경우 TCP를 대안으로 사용할 수 있습니다.
+        enableTcp: true, //SCTP는 데이터 채널을 위한 프로토콜입니다. WebRTC 데이터 채널은 SCTP를 사용하여 텍스트, 파일 등의 비 오디오/비디오 데이터를 교환합니다.
         initialAvailableOutgoingBitrate,
         appData: { user_id, type: data.type },
       });

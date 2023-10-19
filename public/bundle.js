@@ -22036,10 +22036,50 @@ const getLocalStream = () => {
   }
 };
 
+const createDevice = async () => {
+  try {
+    device = new mediasoupClient.Device();
+    await device.load({
+      routerRtpCapabilities: rtpCapabilities,
+    });
+
+    console.log('RTP Capabilities', rtpCapabilities);
+  } catch (error) {
+    console.log(error);
+    if (error.name === 'UnsupportedError')
+      console.warn('browser not supported');
+  }
+};
+
+const getRtpCapabilities = () => {
+  // 서버로 요청을 전송합니다.
+  socket.emit('media', { action: 'getRouterRtpCapabilities' }, (response) => {
+    console.log(`Router RTP Capabilities :`, response.routerRtpCapabilities);
+
+    rtpCapabilities = response.routerRtpCapabilities;
+  });
+};
+
+const createSendTransport = () => {
+  socket.emit(
+    'media',
+    { action: 'createWebRtcTransport', data: { type: 'producer' } },
+    (response) => {
+      if (response.params.error) {
+        console.log(response.params.error);
+        return;
+      }
+
+      console.log(response);
+      producerTransport = device.createSendTransport(response.params);
+    },
+  );
+};
+
 btnLocalVideo.addEventListener('click', getLocalStream);
-// btnRtpCapabilities.addEventListener('click', getRtpCapabilities)
-// btnDevice.addEventListener('click', createDevice)
-// btnCreateSendTransport.addEventListener('click', createSendTransport)
+btnRtpCapabilities.addEventListener('click', getRtpCapabilities);
+btnDevice.addEventListener('click', createDevice);
+btnCreateSendTransport.addEventListener('click', createSendTransport);
 // btnConnectSendTransport.addEventListener('click', connectSendTransport)
 // btnRecvSendTransport.addEventListener('click', createRecvTransport)
 // btnConnectRecvTransport.addEventListener('click', connectRecvTransport)
