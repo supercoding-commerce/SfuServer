@@ -3,16 +3,18 @@ const mediasoupClient = require('mediasoup-client');
 // import io from 'socket.io-client';
 // import * as mediasoupClient from 'mediasoup-client';
 
-const socket = io('ws://localhost:8081');
+// Define session ID, user ID, and other necessary info
+const session_id = 'your-session-id'; // 방 아이디
+const user_id = 'your-user-id'; // 그때 그때 그 유저 아이디
+
+const socket = io(
+  `http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
+);
 
 // Listen for connection
 socket.on('connect', () => {
   console.log('Connected to the server');
 });
-
-// Define session ID, user ID, and other necessary info
-// const session_id = 'your-session-id';
-// const user_id = 'your-user-id';
 
 // // Join the session
 // socket.emit('join', { session_id, user_id });
@@ -118,7 +120,10 @@ const getRtpCapabilities = () => {
 const createSendTransport = () => {
   socket.emit(
     'media',
-    { action: 'createWebRtcTransport', data: { type: 'producer' } },
+    {
+      action: 'createWebRtcTransport',
+      data: { type: 'producer' },
+    },
     (response) => {
       if (response.params.error) {
         console.log(response.params.error);
@@ -153,18 +158,20 @@ const createSendTransport = () => {
           // tell the server to create a Producer
           // with the following parameters and produce
           // and expect back a server side producer id
-          // see server's socket.on('transport-produce', ...)
           await socket.emit(
-            'produce',
+            'media',
             {
-              kind: parameters.kind,
-              rtpParameters: parameters.rtpParameters,
-              appData: parameters.appData,
+              action: 'produce',
+              data: {
+                kind: parameters.kind,
+                rtpParameters: parameters.rtpParameters,
+                appData: parameters.appData,
+              },
             },
-            ({ id }) => {
+            (response) => {
               // Tell the transport that parameters were transmitted and provide it with the
               // server side producer's id.
-              callback({ id });
+              console.log('444444', response);
             },
           );
         } catch (error) {
@@ -179,7 +186,7 @@ const connectSendTransport = async () => {
   // we now call produce() to instruct the producer transport
   // to send media to the Router
   // https://mediasoup.org/documentation/v3/mediasoup-client/api/#transport-produce
-  // this action will trigger the 'connect' and 'produce' events above
+  // 위의 'connect' and 'produce' 이벤트를 발생시킵니다.
   producer = await producerTransport.produce(params);
 
   producer.on('trackended', () => {
@@ -196,20 +203,20 @@ const connectSendTransport = async () => {
 };
 
 const createRecvTransport = async () => {
-  // see server's socket.on('consume', sender?, ...)
-  // this is a call from Consumer, so sender = false
   await socket.emit(
     'media',
-    { action: 'createWebRtcTransport', data: { type: 'consumer' } },
+    {
+      action: 'createWebRtcTransport',
+      data: { type: 'consumer' },
+      user_id: 'test-producer',
+    },
     (response) => {
-      // The server sends back params needed
-      // to create Send Transport on the client side
       if (response.params.error) {
         console.log(response.params.error);
         return;
       }
 
-      console.log('44444444', response);
+      console.log('55555555', response);
 
       // creates a new WebRTC Transport to receive media
       // based on server's consumer transport params
@@ -218,7 +225,6 @@ const createRecvTransport = async () => {
 
       // https://mediasoup.org/documentation/v3/communication-between-client-and-server/#producing-media
       // this event is raised when a first call to transport.produce() is made
-      // see connectRecvTransport() below
       dtlsParameters = response.params.dtlsParameters;
       consumerTransport.on(
         'connect',
@@ -252,7 +258,11 @@ const connectRecvTransport = async () => {
     'media',
     {
       action: 'consume',
-      rtpCapabilities: device.rtpCapabilities,
+      data: {
+        rtpCapabilities: device.rtpCapabilities,
+        kind: 'video',
+        user_id: 'testConsumer',
+      },
     },
     async ({ params }) => {
       if (params.error) {
@@ -260,7 +270,7 @@ const connectRecvTransport = async () => {
         return;
       }
 
-      console.log('555555', params);
+      console.log('666666', params);
       // then consume with the local consumer transport
       // which creates a consumer
       consumer = await consumerTransport.consume({
@@ -275,9 +285,9 @@ const connectRecvTransport = async () => {
 
       remoteVideo.srcObject = new MediaStream([track]);
 
-      // the server consumer started with media paused
-      // so we need to inform the server to resume
-      socket.emit('producerresume');
+      // // the server consumer started with media paused
+      // // so we need to inform the server to resume
+      // socket.emit('producerresume');
     },
   );
 };
