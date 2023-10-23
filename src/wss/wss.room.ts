@@ -597,7 +597,7 @@ export class WssRoom {
   private async produce(
     data: { rtpParameters: RTCRtpParameters; kind: MediaKind },
     user_id: string,
-  ): Promise<object> {
+  ): Promise<String> {
     try {
       this.logger.info(`room ${this.session_id} produce - ${data.kind}`);
 
@@ -650,7 +650,9 @@ export class WssRoom {
         );
       });
 
-      return {};
+      console.log('producerId:', producer.id, producer.kind);
+
+      return producer.id;
     } catch (error) {
       this.logger.error(
         error.message,
@@ -675,11 +677,13 @@ export class WssRoom {
     user_id: string,
   ): Promise<object> {
     try {
-      this.logger.info(`room ${this.session_id} produce - ${data.kind}`);
+      this.logger.info(`room ${this.session_id} consume - ${data.kind}`);
 
       const user = this.clients.get(user_id);
       const target = this.clients.get(data.user_id);
-
+      console.log('2222222', user_id);
+      console.log('2222222', data.user_id);
+      console.log('222222', target);
       let target_producer: Producer;
 
       switch (data.kind) {
@@ -690,6 +694,9 @@ export class WssRoom {
           target_producer = target.media.producerAudio;
           break;
       }
+
+      console.log('target.media:', target.media);
+      console.log('target_producer:', target_producer);
 
       if (
         !target_producer ||

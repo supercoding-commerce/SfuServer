@@ -21949,18 +21949,52 @@ const mediasoupClient = require('mediasoup-client');
 // import io from 'socket.io-client';
 // import * as mediasoupClient from 'mediasoup-client';
 
-// Define session ID, user ID, and other necessary info
 const session_id = 'your-session-id'; // 방 아이디
-const user_id = 'your-user-id'; // 그때 그때 그 유저 아이디
+const producer_id = 'your-producer-id'; // 그때 그때 그 유저 아이디
+const consumer_id = 'your-consumer-id';
+let user_id;
+let socket;
 
-const socket = io(
-  `http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
+// Get radio button elements
+const producerRadio = document.querySelector(
+  'input[name="role"][value="producer"]',
+);
+const consumerRadio = document.querySelector(
+  'input[name="role"][value="consumer"]',
 );
 
-// Listen for connection
-socket.on('connect', () => {
-  console.log('Connected to the server');
-});
+// Function to set the user_id based on radio button selection
+function setUserId() {
+  if (producerRadio.checked) {
+    user_id = producer_id;
+  } else if (consumerRadio.checked) {
+    user_id = consumer_id;
+  }
+}
+
+// Event listeners for radio button changes
+producerRadio.addEventListener('change', setUserId);
+consumerRadio.addEventListener('change', setUserId);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function init() {
+  setUserId();
+  await sleep(5000); // Sleep for 5 seconds
+
+  socket = io(
+    `http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
+  );
+
+  // Listen for connection
+  socket.on('connect', () => {
+    console.log('Connected to the server');
+  });
+}
+
+init();
 
 // // Join the session
 // socket.emit('join', { session_id, user_id });
@@ -22114,10 +22148,11 @@ const createSendTransport = () => {
                 appData: parameters.appData,
               },
             },
-            (response) => {
+            (id) => {
               // Tell the transport that parameters were transmitted and provide it with the
               // server side producer's id.
-              console.log('444444', response);
+              console.log('444444', id);
+              callback({ id });
             },
           );
         } catch (error) {
@@ -22199,6 +22234,7 @@ const connectRecvTransport = async () => {
   // for consumer, we need to tell the server first
   // to create a consumer based on the rtpCapabilities and consume
   // if the router can consume, it will send back a set of params as below
+  console.log(device);
   console.log(device.rtpCapabilities);
   await socket.emit(
     'media',
@@ -22207,23 +22243,23 @@ const connectRecvTransport = async () => {
       data: {
         rtpCapabilities: device.rtpCapabilities,
         kind: 'video',
-        user_id: 'testConsumer',
+        user_id: producer_id,
       },
     },
-    async ({ params }) => {
-      if (params.error) {
+    async (response) => {
+      if (response.error) {
         console.log('Cannot Consume');
         return;
       }
 
-      console.log('666666', params);
+      console.log('666666', response);
       // then consume with the local consumer transport
       // which creates a consumer
       consumer = await consumerTransport.consume({
-        id: params.id,
-        producerId: params.producerId,
-        kind: params.kind,
-        rtpParameters: params.rtpParameters,
+        id: response.id,
+        producerId: response.producerId,
+        kind: response.kind,
+        rtpParameters: response.rtpParameters,
       });
 
       // destructure and retrieve the video track from the producer
