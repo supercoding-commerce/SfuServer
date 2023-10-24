@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  commerce:
+    image: zin354/commerce-media:latest
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+      - '8080:8080'
+      - '8081:8081'
+      - '10000-10100:10000-10100/udp'
+
+  #SSL 인증 용도
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./conf/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - '80:80'
+      - '443:443'
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot

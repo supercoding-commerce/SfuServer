@@ -3,9 +3,9 @@ const mediasoupClient = require('mediasoup-client');
 // import io from 'socket.io-client';
 // import * as mediasoupClient from 'mediasoup-client';
 
-const session_id = 'your-session-id'; // 방 아이디
-const producer_id = 'your-producer-id'; // 그때 그때 그 유저 아이디
-const consumer_id = 'your-consumer-id';
+const session_id = 'testSession'; // 방 아이디
+const producer_id = 'testProducer'; // 그때 그때 그 유저 아이디
+const consumer_id = 'testConsumer';
 let user_id;
 let socket;
 
@@ -38,9 +38,9 @@ async function init() {
   setUserId();
   await sleep(5000); // Sleep for 5 seconds
 
-  socket = io(
-    `http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
-  );
+  socket =
+    io();
+    //`http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
 
   // Listen for connection
   socket.on('connect', () => {
@@ -72,22 +72,29 @@ let params = {
   // mediasoup params
   encodings: [
     {
+      // rid:  RTP 스트림의 고유 식별자입니다.
       rid: 'r0',
-      maxBitrate: 100000,
+      // 해당 RTP 스트림에 대한 최대 비트레이트를 지정합니다.
+      //100,000 bits ÷ 8 = 12,500 bytes per second
+      //12,500 bytes는 12.5 KB (킬로바이트)
+      maxBitrate: 1000000,
+      //  RTP 인코딩의 스케일러빌리티 모드를 지정합니다.
+      // 여기서 'S1T3'는 1x3 모드로, 공간적 스케일러빌리티는 1이고 시간적 스케일러빌리티는 3입니다.
       scalabilityMode: 'S1T3',
     },
     {
       rid: 'r1',
-      maxBitrate: 300000,
+      maxBitrate: 3000000,
       scalabilityMode: 'S1T3',
     },
     {
       rid: 'r2',
-      maxBitrate: 900000,
+      maxBitrate: 9000000,
       scalabilityMode: 'S1T3',
     },
   ],
   // https://mediasoup.org/documentation/v3/mediasoup-client/api/#ProducerCodecOptions
+  //비디오 인코더에 사용할 시작 비트레이트를 지정합니다.
   codecOptions: {
     videoGoogleStartBitrate: 1000,
   },
@@ -106,7 +113,7 @@ const getLocalStream = () => {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices
       .getUserMedia({
-        audio: false,
+        audio: true,
         video: {
           width: {
             min: 640,
@@ -218,10 +225,13 @@ const createSendTransport = () => {
 };
 
 const connectSendTransport = async () => {
-  // we now call produce() to instruct the producer transport
-  // to send media to the Router
   // https://mediasoup.org/documentation/v3/mediasoup-client/api/#transport-produce
   // 위의 'connect' and 'produce' 이벤트를 발생시킵니다.
+  //mediasoup 클라이언트 라이브러리에서 produce() 메서드를 호출할 때 params를 전달하는 것은
+  //클라이언트 측의 WebRTC API와 mediasoup 클라이언트 라이브러리 사이의 상호작용을 위한 것입니다.
+  //이 params는 RTP 송신의 구성 및 제어에 사용되며, 서버에는 전달되지 않습니다.
+  //클라이언트와 서버 간의 최소한의 정보 교환을 통해 효율적인 동작을 목표로 합니다. produce() 메서드를 호출할 때 제공되는 params는 mediasoup 클라이언트 라이브러리가 내부적으로 WebRTC RTCPeerConnection을 구성하기 위해 사용됩니다.
+  //실제 RTP 파라미터 및 관련 설정은 producerTransport.on('produce', ...) 이벤트 핸들러 내에서 서버에 전송되며, 이는 mediasoup 서버가 RTP 송신을 받아들이고 처리하기 위한 설정을 제공합니다.
   producer = await producerTransport.produce(params);
 
   producer.on('trackended', () => {
@@ -318,12 +328,13 @@ const connectRecvTransport = async () => {
 
       // destructure and retrieve the video track from the producer
       const { track } = consumer;
-
+      console.log('7777777', track);
+      remoteVideo.autoplay = true;
       remoteVideo.srcObject = new MediaStream([track]);
 
       // // the server consumer started with media paused
       // // so we need to inform the server to resume
-      // socket.emit('producerresume');
+      socket.emit('producerresume');
     },
   );
 };
