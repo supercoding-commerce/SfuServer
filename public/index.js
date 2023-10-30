@@ -38,9 +38,10 @@ async function init() {
   setUserId();
   await sleep(5000); // Sleep for 5 seconds
 
-  socket =
-    io();
+  socket = io(
     //`http://localhost:8081?user_id=${user_id}&session_id=${session_id}`,
+    `http://3.34.5.151:8081?user_id=${user_id}&session_id=${session_id}`,
+  );
 
   // Listen for connection
   socket.on('connect', () => {

@@ -685,6 +685,7 @@ export class WssRoom {
       const target = this.clients.get(data.user_id);
       console.log('2222222', user_id);
       console.log('2222222', data.user_id);
+      console.log('3333333', target.media);
       let target_producer: Producer;
 
       switch (data.kind) {
